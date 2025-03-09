@@ -103,7 +103,7 @@ void loop() {
     readNextDistance();
     bool tooClose = false;
     for (int i = 0; i < NUM_ANGLES; i++) {
-        if (distances[i] < 300) { // Check if any objects are closer than 300 mm
+        if (distances[i] < 50) { // Check if any objects are closer than 300 mm
             tooClose = true;
             Serial.print("Obstacle too close at angle ");
             Serial.println(sensorAngles[i]);
