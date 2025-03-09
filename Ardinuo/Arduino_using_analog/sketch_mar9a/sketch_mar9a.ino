@@ -1,11 +1,11 @@
 #include <Servo.h>
 
-// Define servo for ultrasonic sensor aiming
 Servo servo;
 
 // Define pin connections
 const int trigPin = 13;  // Trigger pin for ultrasonic sensor
-const int echoPin = 12;  // Echo pin for ultrasonic sensor
+const int echoPin = A0;  // Echo pin for ultrasonic sensor (Analog pin used as digital)
+
 const int servoPin = 11; // Servo pin to control sensor direction
 
 // Motor driver pins for L298N
@@ -16,26 +16,17 @@ const int in3Pin = 4;    // Right motor direction pin 1
 const int in4Pin = 2;    // Right motor direction pin 2
 const int enBPin = 3;    // PWM control for right motor speed
 
-// Motor identification for control functions
 enum Motor { LEFT, RIGHT };
 
-// Function to control motor directions and speeds
 void go(Motor m, int speed) {
-    if (m == LEFT) {
-        digitalWrite(in1Pin, speed > 0 ? HIGH : LOW);
-        digitalWrite(in2Pin, speed <= 0 ? HIGH : LOW);
-        analogWrite(enAPin, abs(speed));
-    } else {
-        digitalWrite(in3Pin, speed > 0 ? HIGH : LOW);
-        digitalWrite(in4Pin, speed <= 0 ? HIGH : LOW);
-        analogWrite(enBPin, abs(speed));
-    }
+    digitalWrite(m == LEFT ? in1Pin : in3Pin, speed > 0 ? HIGH : LOW);
+    digitalWrite(m == LEFT ? in2Pin : in4Pin, speed <= 0 ? HIGH : LOW);
+    analogWrite(m == LEFT ? enAPin : enBPin, abs(speed));
     Serial.print(m == LEFT ? "Left" : "Right");
     Serial.print(" motor speed set to ");
     Serial.println(speed);
 }
 
-// Function to test motor operation
 void testMotors() {
     Serial.println("Testing Motors:");
     go(LEFT, 255);
@@ -50,7 +41,6 @@ void testMotors() {
     go(RIGHT, 0);
 }
 
-// Function to read distance from the ultrasonic sensor
 unsigned int readDistance() {
     digitalWrite(trigPin, HIGH);
     delayMicroseconds(10);
@@ -59,12 +49,10 @@ unsigned int readDistance() {
     return period * 0.343 / 2;
 }
 
-// Angle settings for ultrasonic sensor scanning
 #define NUM_ANGLES 7
 int sensorAngles[NUM_ANGLES] = {60, 70, 80, 90, 100, 110, 120};
 unsigned int distances[NUM_ANGLES];
 
-// Function to scan area with ultrasonic sensor
 void readNextDistance() {
     static int angleIndex = 0;
     static bool increasing = true;
@@ -88,11 +76,10 @@ void readNextDistance() {
     }
 }
 
-// Setup function to initialize components
 void setup() {
     Serial.begin(9600);
     pinMode(trigPin, OUTPUT);
-    pinMode(echoPin, INPUT);
+    pinMode(echoPin, INPUT);  // Set the analog pin as a digital input
     pinMode(enAPin, OUTPUT);
     pinMode(in1Pin, OUTPUT);
     pinMode(in2Pin, OUTPUT);
@@ -101,10 +88,10 @@ void setup() {
     pinMode(enBPin, OUTPUT);
 
     servo.attach(servoPin);
-    servo.write(90); // Center the servo
-    go(LEFT, 0);     // Ensure motors are off
-    go(RIGHT, 0);    // Ensure motors are off
-    testMotors();    // Perform a quick motor test
+    servo.write(90);  // Center the servo
+    go(LEFT, 0);      // Ensure motors are off
+    go(RIGHT, 0);     // Ensure motors are off
+    testMotors();     // Perform a quick motor test
 
     for (int i = 0; i < NUM_ANGLES; i++) {
         readNextDistance();
@@ -112,7 +99,6 @@ void setup() {
     }
 }
 
-// Main loop function
 void loop() {
     readNextDistance();
     bool tooClose = false;

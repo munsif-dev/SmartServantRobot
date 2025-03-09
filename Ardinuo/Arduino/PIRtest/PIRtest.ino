@@ -1,4 +1,4 @@
-const int pirPin = 9;  // PIR sensor connected to pin 9
+const int pirPin = 11;  // PIR sensor connected to pin 9
 
 void setup() {
     pinMode(pirPin, INPUT);
