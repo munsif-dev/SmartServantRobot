@@ -19,11 +19,11 @@
 #define STATE_AVOID 3        // Obstacle avoidance mode
 
 // Constants
-#define OBSTACLE_THRESHOLD 10   // cm (reduced to avoid false detections)
-#define MOTION_CHECK_TIMEOUT 8000 // ms to wait for motion detection
-#define INTERACTION_TIME 10000    // ms to wait during human interaction
-#define TURN_TIME 1000           // ms for turning actions
-#define MOTOR_SPEED 70         // PWM value (0-255)
+#define OBSTACLE_THRESHOLD 12   // cm (reduced to avoid false detections)
+#define MOTION_CHECK_TIMEOUT 2000 // ms to wait for motion detection
+#define INTERACTION_TIME 6000    // ms to wait during human interaction
+#define TURN_TIME 500           // ms for turning actions
+#define MOTOR_SPEED 100         // PWM value (0-255)
 #define NUM_READINGS 5          // Number of readings to average
 
 Servo myServo;  
@@ -165,10 +165,10 @@ boolean scanForPath() {
   long distances[3]; // Store distances at all three angles
   
   // Scan right side first (right priority to solve left-turning issue)
-  myServo.write(120);
+  myServo.write(135);
   delay(500); // Give servo time to move
   distances[2] = getDistance();
-  Serial.print("Distance at angle 120 (right): ");
+  Serial.print("Distance at angle 135 (right): ");
   Serial.print(distances[2]);
   Serial.println(" cm");
   
@@ -181,10 +181,10 @@ boolean scanForPath() {
   Serial.println(" cm");
   
   // Finally check left side
-  myServo.write(60);
+  myServo.write(45);
   delay(500);
   distances[0] = getDistance();
-  Serial.print("Distance at angle 60 (left): ");
+  Serial.print("Distance at angle 45 (left): ");
   Serial.print(distances[0]);
   Serial.println(" cm");
   
@@ -203,9 +203,9 @@ boolean scanForPath() {
   if (bestAngleIndex >= 0) {
     found = true;
     switch (bestAngleIndex) {
-      case 0: clearPathAngle = 60; break; // Left
+      case 0: clearPathAngle = 45; break; // Left
       case 1: clearPathAngle = 90; break; // Center
-      case 2: clearPathAngle = 120; break; // Right
+      case 2: clearPathAngle = 135; break; // Right
     }
     
     Serial.print("Best path found at angle: ");
@@ -228,13 +228,13 @@ void avoidObstacle() {
     // Clear path is to the left
     Serial.println("Turning left to follow clear path");
     turnLeft();
-    delay(map(clearPathAngle, 60, 90, TURN_TIME*1.5, TURN_TIME/2)); // More left turn for smaller angles
+    delay(map(clearPathAngle, 45, 90, TURN_TIME*2, TURN_TIME/2)); // More left turn for smaller angles
   } 
   else if (clearPathAngle > 90) {
     // Clear path is to the right
     Serial.println("Turning right to follow clear path");
     turnRight();
-    delay(map(clearPathAngle, 90, 120, TURN_TIME/2, TURN_TIME*1.5)); // More right turn for larger angles
+    delay(map(clearPathAngle, 90, 135, TURN_TIME/2, TURN_TIME*2)); // More right turn for larger angles
   }
   
   stopMotors();
